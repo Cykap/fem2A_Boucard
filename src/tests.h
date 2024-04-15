@@ -50,6 +50,44 @@ namespace FEM2A {
             mesh.save("data/geothermie_4.mesh");
             return true;
         }
+        
+        bool test_quadrature()
+        {
+        	Quadrature quad;
+        	quad = quad.get_quadrature(2,false);
+        	int i=0;
+        	float somme = 0;
+        	while (i<quad.nb_points()) {
+        		somme = somme + quad.weight(i);
+        		i = i+1;
+        	}
+        	std::cout << "somme : " << somme << std::endl;
+        	return true;
+        }
 
+	bool test_ElementMapping()
+	{
+		Mesh carre;
+		carre.load("data/square.mesh");
+		// test sur le triangle 4 de square.mesh
+		ElementMapping( carre, false, 4 );
+		return true;
+	}
+	
+	bool test_ElementTransform()
+	{
+		Mesh carre;
+		carre.load("data/square.mesh");
+		vertex p;
+		p.x = 0.2;
+		p.y = 0.4;
+		vertex r;
+		ElementMapping E( carre, false, 4 );
+		r = E.transform(p);
+		std::cout << r.x << "	" << r.y << std::endl;
+		return true;
+	
+	
+	}
     }
 }

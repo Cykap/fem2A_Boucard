@@ -29,10 +29,16 @@ using namespace FEM2A;
 void run_tests()
 {
     const bool t_opennl = true;
-    const bool t_lmesh = true;
-    const bool t_io = true;
-
+    const bool t_lmesh = false;
+    const bool t_io = false;
+    const bool t_quadra = false;
+    const bool t_map = true;
+    const bool t_transfo = true;
+	
     if( t_opennl ) test_opennl();
+    if( t_quadra ) Tests::test_quadrature();
+    if( t_map ) Tests::test_ElementMapping();
+    if( t_transfo ) Tests::test_ElementTransform();
     if( t_lmesh ) Tests::test_load_mesh();
     if( t_io ) Tests::test_load_save_mesh();
 }

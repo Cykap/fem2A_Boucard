@@ -132,17 +132,35 @@ namespace FEM2A {
     ElementMapping::ElementMapping( const Mesh& M, bool border, int i )
         : border_( border )
     {
-        std::cout << "[ElementMapping] constructor for element " << i << " ";
-        if ( border ) std::cout << "(border)";
-        std::cout << '\n';
-        // TODO
+    	std::cout << "Coordonnee des sommets : \n";
+        if ( border==true ) {
+        	for (int v = 0; v < 2; ++v ){
+        		vertices_.push_back(M.get_edge_vertex(i,v));
+        		std::cout << "v" << v <<" : " << vertices_[v].x << "	" << vertices_[v].y << std::endl;
+        	} 
+        }
+        else {
+        	for ( int v = 0; v < 3; ++v ){
+        		vertices_.push_back(M.get_triangle_vertex(i,v)) ;
+        		std::cout << "v" << v <<" : " << vertices_[v].x << "	" << vertices_[v].y << std::endl;
+        	} 
+        }
     }
 
     vertex ElementMapping::transform( vertex x_r ) const
     {
-        std::cout << "[ElementMapping] transform reference to world space" << '\n';
-        // TODO
         vertex r ;
+        if ( border_ ) {
+        	double xi = x_r.x ;
+        	r.x = (1-xi)*vertices_[0].x + xi*vertices_[1].x ;
+        	r.y = (1-xi)*vertices_[0].y + xi*vertices_[1].y ;
+        }
+        else {
+        	double xi = x_r.x ;
+        	double eta = x_r.y ;
+        	r.x = (1-xi-eta)*vertices_[0].x + xi*vertices_[1].x + eta*vertices_[2].x ;
+        	r.y = (1-xi-eta)*vertices_[0].y + xi*vertices_[1].y + eta*vertices_[2].y ;
+		}
         return r ;
     }
 
@@ -187,9 +205,25 @@ namespace FEM2A {
 
     vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r ) const
     {
-        std::cout << "[ShapeFunctions] evaluate gradient shape function " << i << '\n';
-        // TODO
         vec2 g ;
+        if (dim_ == 1 ) {
+        	switch(i) {
+        		case 0:
+        			g.x = -1.; break;
+        		case 1:
+        			g.x = 1.; break;
+        	}
+        	g.y = 0. ;
+        } else {
+        	switch(i) {
+        		case 0:
+        			g.x = -1.; g.y = -1.; break;
+        		case 1:
+        			g.x = 1.; g.y = 0.; break;
+        		case 2:
+        			g.x = 0.; g.y = 1.; break;
+        	}
+        }
         return g ;
     }
 
