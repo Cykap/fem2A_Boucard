@@ -89,5 +89,21 @@ namespace FEM2A {
 	
 	
 	}
+	
+	bool test_JacobMatrix()
+	{
+		Mesh carre;
+		carre.load("data/square.mesh");
+		vertex p;
+		p.x = 0.2;
+		p.y = 0.4;
+		DenseMatrix J;
+		ElementMapping E( carre, false, 4 );
+		J = E.jacobian_matrix(p);
+		J.print();
+		double det = E.jacobian(p);
+		std::cout << det << std::endl;
+		return true;
+	}
     }
 }

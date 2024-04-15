@@ -32,13 +32,15 @@ void run_tests()
     const bool t_lmesh = false;
     const bool t_io = false;
     const bool t_quadra = false;
-    const bool t_map = true;
-    const bool t_transfo = true;
+    const bool t_map = false;
+    const bool t_transfo = false;
+    const bool t_jacobM = true;
 	
     if( t_opennl ) test_opennl();
     if( t_quadra ) Tests::test_quadrature();
     if( t_map ) Tests::test_ElementMapping();
     if( t_transfo ) Tests::test_ElementTransform();
+    if( t_jacobM ) Tests::test_JacobMatrix();
     if( t_lmesh ) Tests::test_load_mesh();
     if( t_io ) Tests::test_load_save_mesh();
 }

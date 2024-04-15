@@ -166,17 +166,34 @@ namespace FEM2A {
 
     DenseMatrix ElementMapping::jacobian_matrix( vertex x_r ) const
     {
-        std::cout << "[ElementMapping] compute jacobian matrix" << '\n';
-        // TODO
         DenseMatrix J ;
+        if ( border_ ) {
+        	J.set_size(2,1);
+        	J.set(0,0, -vertices_[0].x + vertices_[1].x) ;
+        	J.set(1,0, -vertices_[0].y + vertices_[1].y) ;
+        }
+        else {
+        	J.set_size(2,2);
+        	J.set(0,0, -vertices_[0].x + vertices_[1].x) ;
+        	J.set(0,1, -vertices_[0].x + vertices_[2].x) ;
+        	J.set(1,0, -vertices_[0].y + vertices_[1].y) ;
+        	J.set(1,1, -vertices_[0].y + vertices_[2].y) ;
+        }
         return J ;
     }
 
     double ElementMapping::jacobian( vertex x_r ) const
     {
-        std::cout << "[ElementMapping] compute jacobian determinant" << '\n';
-        // TODO
-        return 0. ;
+
+	DenseMatrix J = jacobian_matrix(x_r);
+	if (border_) {
+		double JTJ = J.get(0,0)*J.get(0,0) + J.get(1,0)*J.get(1,0);
+		return std::sqrt(JTJ);
+	}
+        else {
+        	double JTJ = J.det_2x2();
+        	return JTJ;
+        }
     }
 
     /****************************************************************/
@@ -185,22 +202,54 @@ namespace FEM2A {
     ShapeFunctions::ShapeFunctions( int dim, int order )
         : dim_( dim ), order_( order )
     {
-        std::cout << "[ShapeFunctions] constructor in dimension " << dim << '\n';
-        // TODO
+        bool SF_constru = true;
+        if (dim != 1 && dim != 2) {
+        	std::cout << "Implementation uniquement en 1D ou 2D \n";
+        	SF_constru = false;
+        } 
+        if (order != 1) {
+        	std::cout << "Uniquement fonctions d'ordre 1 \n";
+        	SF_constru = false;
+        }
+        assert(SF_constru);
     }
 
     int ShapeFunctions::nb_functions() const
     {
         std::cout << "[ShapeFunctions] number of functions" << '\n';
-        // TODO
-        return 0 ;
+        if (dim_ == 1) {
+        	return 2 ;
+        }
+        if (dim_ == 2) {
+        	return 3;
+        }
+        return 0;
     }
 
     double ShapeFunctions::evaluate( int i, vertex x_r ) const
     {
-        std::cout << "[ShapeFunctions] evaluate shape function " << i << '\n';
-        // TODO
-        return 0. ; // should not be reached
+    	if (dim_ == 1 ) {
+		double xi = x_r.x;
+		switch(i) {
+			case (0):
+				return 1-xi;
+			case (1):
+				return xi;
+		}
+    	} 
+    	else {
+		int xi = x_r.x;
+		int eta = x_r.y;
+		switch(i) {
+			case (0):
+				return 1-xi-eta;
+			case (1):
+				return xi;
+			case (2):
+				return eta;
+		}
+    	}
+    	return 0.;
     }
 
     vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r ) const
@@ -208,19 +257,20 @@ namespace FEM2A {
         vec2 g ;
         if (dim_ == 1 ) {
         	switch(i) {
-        		case 0:
+        		case (0):
         			g.x = -1.; break;
-        		case 1:
+        		case (1):
         			g.x = 1.; break;
         	}
         	g.y = 0. ;
-        } else {
+        } 
+        else {
         	switch(i) {
-        		case 0:
+        		case (0):
         			g.x = -1.; g.y = -1.; break;
-        		case 1:
+        		case (1):
         			g.x = 1.; g.y = 0.; break;
-        		case 2:
+        		case (2):
         			g.x = 0.; g.y = 1.; break;
         	}
         }
@@ -234,10 +284,10 @@ namespace FEM2A {
         const ElementMapping& elt_mapping,
         const ShapeFunctions& reference_functions,
         const Quadrature& quadrature,
-        double (*coefficient)(vertex),
-        DenseMatrix& Ke )
+        double (*coefficient)(vertex), DenseMatrix& Ke )
     {
-        std::cout << "compute elementary matrix" << '\n';
+    	
+    	//Ke.set_size(2,1)
         // TODO
     }
 
