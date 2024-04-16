@@ -13,7 +13,26 @@
 
 namespace FEM2A {
     namespace Tests {
+	//#################################
+        //  Useful functions
+        //#################################
 
+        double unit_fct( vertex v )
+        {
+            return 1.;
+        }
+
+        double zero_fct( vertex v )
+        {
+            return 0.;
+        }
+
+        double xy_fct( vertex v )
+        {
+            return v.x + v.y;
+        }
+	
+	
         bool test_load_mesh()
         {
             Mesh mesh;
@@ -86,8 +105,6 @@ namespace FEM2A {
 		r = E.transform(p);
 		std::cout << r.x << "	" << r.y << std::endl;
 		return true;
-	
-	
 	}
 	
 	bool test_JacobMatrix()
@@ -105,5 +122,40 @@ namespace FEM2A {
 		std::cout << det << std::endl;
 		return true;
 	}
+	
+	bool test_ElementaryMatrix() 
+	{
+        	Mesh carre;
+		carre.load("data/square.mesh");
+		ElementMapping ElMap( carre, false, 4 );
+		ShapeFunctions ShFct(2, 1);
+		Quadrature quad;
+        	quad = quad.get_quadrature(2,false);
+        	DenseMatrix Ke;
+        	assemble_elementary_matrix(ElMap, ShFct, quad, unit_fct, Ke);
+        	Ke.print();
+        	SparseMatrix K(carre.nb_vertices());
+        	local_to_global_matrix(carre, 4, Ke, K);
+        	K.print();
+        	
+        	return true;
+        }
+        
+        bool test_ElementaryVector() 
+	{
+        	Mesh carre;
+		carre.load("data/square.mesh");
+		ElementMapping ElMap( carre, false, 4 );
+		ShapeFunctions ShFct(2, 1);
+		Quadrature quad;
+        	quad = quad.get_quadrature(2,false);
+        	std::vector< double > Fe(ShFct.nb_functions(),0);
+        	assemble_elementary_vector(ElMap, ShFct, quad, unit_fct, Fe);
+		std::cout << Fe[0] << std::endl;
+		std::cout << Fe[1] << std::endl;
+        	std::cout << Fe[2] << std::endl;
+        	return true;
+        }
+        
     }
 }

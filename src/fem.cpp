@@ -132,17 +132,17 @@ namespace FEM2A {
     ElementMapping::ElementMapping( const Mesh& M, bool border, int i )
         : border_( border )
     {
-    	std::cout << "Coordonnee des sommets : \n";
+    	//std::cout << "Coordonnee des sommets : \n";
         if ( border==true ) {
         	for (int v = 0; v < 2; ++v ){
         		vertices_.push_back(M.get_edge_vertex(i,v));
-        		std::cout << "v" << v <<" : " << vertices_[v].x << "	" << vertices_[v].y << std::endl;
+        		//std::cout << "v" << v <<" : " << vertices_[v].x << "	" << vertices_[v].y << std::endl;
         	} 
         }
         else {
         	for ( int v = 0; v < 3; ++v ){
         		vertices_.push_back(M.get_triangle_vertex(i,v)) ;
-        		std::cout << "v" << v <<" : " << vertices_[v].x << "	" << vertices_[v].y << std::endl;
+        		//std::cout << "v" << v <<" : " << vertices_[v].x << "	" << vertices_[v].y << std::endl;
         	} 
         }
     }
@@ -216,7 +216,6 @@ namespace FEM2A {
 
     int ShapeFunctions::nb_functions() const
     {
-        std::cout << "[ShapeFunctions] number of functions" << '\n';
         if (dim_ == 1) {
         	return 2 ;
         }
@@ -284,11 +283,24 @@ namespace FEM2A {
         const ElementMapping& elt_mapping,
         const ShapeFunctions& reference_functions,
         const Quadrature& quadrature,
-        double (*coefficient)(vertex), DenseMatrix& Ke )
+        double (*coefficient)(vertex), 
+        DenseMatrix& Ke )
     {
-    	
-    	//Ke.set_size(2,1)
-        // TODO
+    	Ke.set_size(reference_functions.nb_functions(), reference_functions.nb_functions());
+    	for(int i = 0; i<reference_functions.nb_functions();++i){
+    		for (int j = 0; j<reference_functions.nb_functions();++j){
+    			double somme = 0;
+    			for (int q = 0; q < quadrature.nb_points(); ++q){
+    				vertex p_q = quadrature.point(q);
+    				double w_q = quadrature.weight(q);
+    				DenseMatrix J_inv = elt_mapping.jacobian_matrix(p_q).invert_2x2();
+    				vec2 grad_i = J_inv.transpose().mult_2x2_2(reference_functions.evaluate_grad(i, p_q));
+    				vec2 grad_j = J_inv.transpose().mult_2x2_2(reference_functions.evaluate_grad(j, p_q));
+    				somme += w_q * coefficient(elt_mapping.transform(p_q)) * dot(grad_i, grad_j) * elt_mapping.jacobian(p_q);
+    			}
+    			Ke.set(i,j, somme);
+    		}
+    	}
     }
 
     void local_to_global_matrix(
@@ -297,8 +309,13 @@ namespace FEM2A {
         const DenseMatrix& Ke,
         SparseMatrix& K )
     {
-        std::cout << "Ke -> K" << '\n';
-        // TODO
+    	for (int i = 0; i<3; ++i) {
+    		for (int j = 0; j<3; ++j){
+    			int I = M.get_triangle_vertex_index(t, i);
+    			int J = M.get_triangle_vertex_index(t, j);
+    			K.add(I,J, Ke.get(i,j));
+    		}
+    	}
     }
 
     void assemble_elementary_vector(
@@ -308,8 +325,17 @@ namespace FEM2A {
         double (*source)(vertex),
         std::vector< double >& Fe )
     {
-        std::cout << "compute elementary vector (source term)" << '\n';
-        // TODO
+    	for(int i = 0; i<reference_functions.nb_functions();++i){
+    		double somme = 0;
+    		for (int q = 0; q < quadrature.nb_points(); ++q){
+    			std::cout << "Q : " << q << std::endl;
+    			vertex p_q = quadrature.point(q);
+    			double w_q = quadrature.weight(q);
+    			somme += w_q * source(elt_mapping.transform(p_q)) * reference_functions.evaluate(i, p_q) * elt_mapping.jacobian(p_q);
+    			std::cout << somme << std::endl;
+    		}
+    		Fe[i] = somme;
+    	}
     }
 
     void assemble_elementary_neumann_vector(
