@@ -44,8 +44,9 @@ void run_tests()
     if( t_jacobM ) Tests::test_JacobMatrix();
     if( t_lmesh ) Tests::test_load_mesh();
     if( t_io ) Tests::test_load_save_mesh();
-    //if( t_elemMatrix ) Tests::test_ElementaryMatrix();
+
     if( t_elemMatrix ) Tests::test_ElementaryVector();
+    //if( t_elemMatrix ) Tests::test_ElementaryMatrix();
 }
 
 void run_simu()
