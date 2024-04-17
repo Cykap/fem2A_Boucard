@@ -44,8 +44,8 @@ void run_tests()
     if( t_jacobM ) Tests::test_JacobMatrix();
     if( t_lmesh ) Tests::test_load_mesh();
     if( t_io ) Tests::test_load_save_mesh();
-    if( t_elemMatrix ) Tests::test_ElementaryMatrix();
-    //if( t_elemMatrix ) Tests::test_ElementaryVector();
+    //if( t_elemMatrix ) Tests::test_ElementaryMatrix();
+    if( t_elemMatrix ) Tests::test_ElementaryVector();
 }
 
 void run_simu()
@@ -55,7 +55,6 @@ void run_simu()
 
     const bool verbose = flag_is_used( "-v", arguments )
         || flag_is_used( "--verbose", arguments );
-
     if( simu_pure_dirichlet ) {
         Simu::pure_dirichlet_pb("data/square.mesh", verbose);
     }

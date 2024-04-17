@@ -231,9 +231,9 @@ namespace FEM2A {
 		double xi = x_r.x;
 		switch(i) {
 			case (0):
-				return 1-xi;
+				return 1-xi; break;
 			case (1):
-				return xi;
+				return xi; break;
 		}
     	} 
     	else {
@@ -241,11 +241,11 @@ namespace FEM2A {
 		int eta = x_r.y;
 		switch(i) {
 			case (0):
-				return 1-xi-eta;
+				return 1-xi-eta; break;
 			case (1):
-				return xi;
+				return xi; break;
 			case (2):
-				return eta;
+				return eta; break;
 		}
     	}
     	return 0.;
@@ -309,14 +309,16 @@ namespace FEM2A {
         const DenseMatrix& Ke,
         SparseMatrix& K )
     {
-    	for (int i = 0; i<3; ++i) {
-    		for (int j = 0; j<3; ++j){
+    	for (int i = 0; i<Ke.height(); ++i) {
+    		for (int j = 0; j<Ke.width(); ++j){
     			int I = M.get_triangle_vertex_index(t, i);
     			int J = M.get_triangle_vertex_index(t, j);
     			K.add(I,J, Ke.get(i,j));
     		}
     	}
     }
+
+
 
     void assemble_elementary_vector(
         const ElementMapping& elt_mapping,
@@ -337,6 +339,8 @@ namespace FEM2A {
     		Fe[i] = somme;
     	}
     }
+
+
 
     void assemble_elementary_neumann_vector(
         const ElementMapping& elt_mapping_1D,
@@ -367,8 +371,21 @@ namespace FEM2A {
         SparseMatrix& K,
         std::vector< double >& F )
     {
-        std::cout << "apply dirichlet boundary conditions" << '\n';
-        // TODO
+        std::vector< bool > processed_vertices(values.size(), false);
+        double penalty = 10000.;
+        for( int edge = 0; edge < M.nb_edges(); edge++ ) {
+        	int edge_attribute = M.get_edge_attribute(edge);
+        	if( attribute_is_dirichlet[edge_attribute] ) {
+        	        for( int v = 0; v < 2; v++ ) {
+        	        	int vertex_index = M.get_edge_vertex_index(edge, v);
+        	        	if( !processed_vertices[vertex_index] ) {
+        	                	processed_vertices[vertex_index] = true;
+                        		K.add(vertex_index, vertex_index, penalty);
+                        		F[vertex_index] += penalty*values[vertex_index];
+                    }
+                }
+            }
+        }
     }
 
     void solve_poisson_problem(
