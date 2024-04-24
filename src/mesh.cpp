@@ -10,6 +10,7 @@ namespace FEM2A {
     {
 
     }
+    
     int Mesh::nb_vertices() const
     {
         return vertices_.size();
@@ -47,6 +48,7 @@ namespace FEM2A {
         assert( vertex_local_index < 2 );
         return edges_[2 * edge_index + vertex_local_index];
     }
+    
     int Mesh::get_triangle_vertex_index( int triangle_index, int vertex_local_index ) const
     {
         assert( triangles_.size() != 0 );

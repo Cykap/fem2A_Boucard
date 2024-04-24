@@ -157,5 +157,21 @@ namespace FEM2A {
         	return true;
         }
         
+        bool test_NeumannVector() 
+	{
+        	Mesh carre;
+		carre.load("data/square.mesh");
+		ElementMapping ElMap( carre, true, 4 );
+		ShapeFunctions ShFct(1, 1);
+		Quadrature quad;
+        	quad = quad.get_quadrature(2, true);
+        	std::vector< double > Fe(ShFct.nb_functions(),0);
+        	assemble_elementary_neumann_vector(ElMap, ShFct, quad, unit_fct, Fe);
+		std::cout << Fe[0] << std::endl;
+		std::cout << Fe[1] << std::endl;
+        	std::cout << Fe[2] << std::endl;
+        	return true;
+        }
+        
     }
 }

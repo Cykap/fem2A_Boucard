@@ -28,15 +28,17 @@ using namespace FEM2A;
 
 void run_tests()
 {
-    const bool t_opennl = true;
+    const bool t_opennl = false;
     const bool t_lmesh = false;
     const bool t_io = false;
     const bool t_quadra = false;
     const bool t_map = false;
     const bool t_transfo = false;
     const bool t_jacobM = false;
-    const bool t_elemMatrix = true;
-	
+    const bool t_elemMatrix = false;
+    const bool t_elemVect = false;
+    const bool t_neumann = true;
+    	
     if( t_opennl ) test_opennl();
     if( t_quadra ) Tests::test_quadrature();
     if( t_map ) Tests::test_ElementMapping();
@@ -45,20 +47,33 @@ void run_tests()
     if( t_lmesh ) Tests::test_load_mesh();
     if( t_io ) Tests::test_load_save_mesh();
 
-    if( t_elemMatrix ) Tests::test_ElementaryVector();
-    //if( t_elemMatrix ) Tests::test_ElementaryMatrix();
+    if( t_elemVect ) Tests::test_ElementaryVector();
+    if( t_elemMatrix ) Tests::test_ElementaryMatrix();
+    
+    if ( t_neumann ) Tests::test_NeumannVector();
 }
 
 void run_simu()
 {
-
-    const bool simu_pure_dirichlet = true;
+    const bool simu_pure_dirichlet = false;
+    const bool simu_dirichlet_source = false;
+    const bool simu_dirichlet_sin = false;
+    const bool simu_dirichlet_neum = true;
 
     const bool verbose = flag_is_used( "-v", arguments )
         || flag_is_used( "--verbose", arguments );
     if( simu_pure_dirichlet ) {
         Simu::pure_dirichlet_pb("data/square.mesh", verbose);
-    }
+        }
+    if( simu_dirichlet_source ) {    
+    	Simu::dirichlet_source_pb("data/square.mesh", verbose);
+    	}
+    if( simu_dirichlet_sin ) {    
+    	Simu::dirichlet_sinus_pb("data/square.mesh", verbose);
+    	}
+    if( simu_dirichlet_neum ) {    
+    	Simu::dirichlet_neumann_pb("data/square.mesh", verbose);
+    	}
 }
 
 int main( int argc, const char * argv[] )
@@ -94,3 +109,4 @@ int main( int argc, const char * argv[] )
 
     return 0;
 }
+

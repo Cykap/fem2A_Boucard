@@ -226,29 +226,30 @@ namespace FEM2A {
     }
 
     double ShapeFunctions::evaluate( int i, vertex x_r ) const
-    {
+    {	
+    	double g;
     	if (dim_ == 1 ) {
 		double xi = x_r.x;
 		switch(i) {
 			case (0):
-				return 1-xi; break;
+				g = 1-xi; break;
 			case (1):
-				return xi; break;
+				g = xi; break;
 		}
     	} 
     	else {
-		int xi = x_r.x;
-		int eta = x_r.y;
+		double xi = x_r.x;
+		double eta = x_r.y;
 		switch(i) {
 			case (0):
-				return 1-xi-eta; break;
+				g = 1-xi-eta; break;
 			case (1):
-				return xi; break;
+				g = xi; break;
 			case (2):
-				return eta; break;
+				g = eta; break;
 		}
     	}
-    	return 0.;
+    	return g;
     }
 
     vec2 ShapeFunctions::evaluate_grad( int i, vertex x_r ) const
@@ -318,8 +319,6 @@ namespace FEM2A {
     	}
     }
 
-
-
     void assemble_elementary_vector(
         const ElementMapping& elt_mapping,
         const ShapeFunctions& reference_functions,
@@ -330,17 +329,13 @@ namespace FEM2A {
     	for(int i = 0; i<reference_functions.nb_functions();++i){
     		double somme = 0;
     		for (int q = 0; q < quadrature.nb_points(); ++q){
-    			std::cout << "Q : " << q << std::endl;
     			vertex p_q = quadrature.point(q);
     			double w_q = quadrature.weight(q);
     			somme += w_q * source(elt_mapping.transform(p_q)) * reference_functions.evaluate(i, p_q) * elt_mapping.jacobian(p_q);
-    			std::cout << somme << std::endl;
-    		}
+    		} 
     		Fe[i] = somme;
     	}
     }
-
-
 
     void assemble_elementary_neumann_vector(
         const ElementMapping& elt_mapping_1D,
@@ -349,8 +344,15 @@ namespace FEM2A {
         double (*neumann)(vertex),
         std::vector< double >& Fe )
     {
-        std::cout << "compute elementary vector (neumann condition)" << '\n';
-        // TODO
+    	for(int i = 0; i<reference_functions_1D.nb_functions();++i){
+    		double somme = 0;
+    		for (int q = 0; q < quadrature_1D.nb_points(); ++q){
+    			vertex p_q = quadrature_1D.point(q);
+    			double w_q = quadrature_1D.weight(q);
+    			somme += w_q * neumann(elt_mapping_1D.transform(p_q)) * reference_functions_1D.evaluate(i, p_q) * elt_mapping_1D.jacobian(p_q);
+    		} 
+    		Fe[i] = somme;
+    	}
     }
 
     void local_to_global_vector(
@@ -360,10 +362,12 @@ namespace FEM2A {
         std::vector< double >& Fe,
         std::vector< double >& F )
     {
-        std::cout << "Fe -> F" << '\n';
-        // TODO
+    	for (int j = 0; j<Fe.size(); ++j){
+    		int J = M.get_triangle_vertex_index(i, j);
+    		F[J] += Fe[j];
+    		}
     }
-
+    
     void apply_dirichlet_boundary_conditions(
         const Mesh& M,
         const std::vector< bool >& attribute_is_dirichlet, /* size: nb of attributes */
