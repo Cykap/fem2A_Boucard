@@ -34,6 +34,12 @@ namespace FEM2A {
             return 2 * PI * PI * sin(PI*v.x) * sin(PI*v.y);
         }
         
+        double sinus_sol_fct( vertex v )
+        {
+            double PI = 3.1415;
+            return sin(PI*v.x) * sin(PI*v.y);
+        }
+        
         double neumann_fct( vertex v )
         {
             double PI = 3.14159265;
@@ -114,6 +120,7 @@ namespace FEM2A {
 		save_solution( x, "Pur_Dirichlet_fine_mesh.bb" ) ;           	
         }
         
+        
         void dirichlet_source_pb( const std::string& mesh_filename, bool verbose )
         {
         	std::cout << "Solving a Dirichlet problem with source" << std::endl;
@@ -166,6 +173,7 @@ namespace FEM2A {
 		save_solution( x, "Dirichlet_source_fine_mesh.bb" ) ;           	
         }
         
+        
         void dirichlet_sinus_pb( const std::string& mesh_filename, bool verbose )
         {
         	std::cout << "Solving a Dirichlet problem with sinus bump" << std::endl;
@@ -212,11 +220,22 @@ namespace FEM2A {
             	
 		std::vector<double> x(M.nb_vertices(), 0);
 		
+		std::vector<double> x_sol(M.nb_vertices(), 0);
+		
 		solve(K, F, x);
+		
+		bool sol = false;
+		if (sol == true) {
+			for (int i = 0; i < M.nb_vertices(); ++i){
+				vertex v = M.get_vertex(i);
+				x[i] -= sinus_sol_fct( v );
+			}
+		}
 		
 		M.save("Dirichlet_sinus.mesh");
 		save_solution( x, "Dirichlet_sinus.bb" ) ;           	
         }
+        
         
         void dirichlet_neumann_pb( const std::string& mesh_filename, bool verbose )
         {
@@ -236,19 +255,11 @@ namespace FEM2A {
             	std::vector< bool > attribute_is_dirichlet(2,false); 
             	attribute_is_dirichlet[1] = true;
             	
-            	std::cout << M.nb_edges() << std::endl;
-    		int som;
-    		for (int edge; edge < M.nb_edges(); edge++) {
-    			std::cout << M.get_edge_attribute(edge) << std::endl;
-    			som += 1;
-    		}
-    		std::cout << som << std::endl;
-            	
             	std::vector< double > values(M.nb_vertices(), 0.); // 0 : None, 1 : Dirichlet, 2 : Neumann
+            	M.set_attribute(unit_fct, 0, true);
         	M.set_attribute(test_droite, 1, true);
         	M.set_attribute(test_gauche, 2, true);
-            
-            
+          
         	for (int triangle = 0; triangle < M.nb_triangles(); triangle++) {
         		ElementMapping ElMap(M, false, triangle);
         		DenseMatrix Ke;
@@ -266,25 +277,15 @@ namespace FEM2A {
     
             	apply_dirichlet_boundary_conditions(M, attribute_is_dirichlet, values, K, F); 
     		
-    		    			std::cout << M.nb_edges() << std::endl;
-    		    			int somm;
-    		for (int edge; edge < M.nb_edges(); edge++) {
-    			std::cout << M.get_edge_attribute(edge) << std::endl;
-    			somm += 1;
-    		}
-    		    		    			std::cout << somm << std::endl;
-    	
-    	
 		for (int edge; edge < M.nb_edges(); edge++) {
 			if (M.get_edge_attribute(edge) == 2) {
 			        ElementMapping ElMap(M, true, edge);
-				std::vector< double > Fe(ShFct_triangle.nb_functions(),0.);
+				std::vector< double > Fe(ShFct_1D.nb_functions(),0.);
      		        	assemble_elementary_neumann_vector(ElMap, ShFct_1D, quad_1D, neumann_fct, Fe);
      		        	local_to_global_vector(M, true, edge, Fe, F);
 			}
 		}
 
-            	
 		std::vector<double> x(M.nb_vertices(), 0);
 		
 		solve(K, F, x);
