@@ -1,5 +1,6 @@
 #include "fem.h"
 #include "mesh.h"
+#include "simu.h"
 
 #include <iomanip>
 #include <iostream>
@@ -393,16 +394,15 @@ namespace FEM2A {
     }
 
     void solve_poisson_problem(
-            const Mesh& M,
+            const Mesh* M,
             double (*diffusion_coef)(vertex),
             double (*source_term)(vertex),
             double (*dirichlet_fct)(vertex),
             double (*neumann_fct)(vertex),
             std::vector<double>& solution,
             int verbose )
-    {
-        std::cout << "solve poisson problem" << '\n';
-        // TODO
+    {        
+    std::cout << "solve poisson problem" << '\n';
     }
 
 }

@@ -58,7 +58,9 @@ void run_simu()
     const bool simu_pure_dirichlet = false;
     const bool simu_dirichlet_source = false;
     const bool simu_dirichlet_sin = false;
-    const bool simu_dirichlet_neum = true;
+    const bool simu_dirichlet_neum = false;
+    const bool simu_mug = false;
+    const bool simu_geo = true;
 
     const bool verbose = flag_is_used( "-v", arguments )
         || flag_is_used( "--verbose", arguments );
@@ -73,6 +75,12 @@ void run_simu()
     	}
     if( simu_dirichlet_neum ) {    
     	Simu::dirichlet_neumann_pb("data/square.mesh", verbose);
+    	}
+    if( simu_mug ) {    
+    	Simu::mug_pb("data/mug_1.mesh", verbose);
+    	}
+    if( simu_geo ) {    
+    	Simu::geothermie_pb("data/geothermie_0_1.mesh", verbose);
     	}
 }
 
